@@ -1,22 +1,60 @@
-const mongoose = require("mongoose");
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect("mongodb+srv://shubhamkc194:shubhamkc2005@cluster0.yrzhttm.mongodb.net/paytm");
-    console.log("✅ MongoDB connected successfully");
-  } catch (err) {
-    console.error("❌ MongoDB connection failed:", err);
-    process.exit(1);
-  }
+   const mongoose = require('mongoose')
+const bcrypt = require('bcrypt');
+  mongoose.connect("mongodb+srv://shubhamkc194:shubhamkc2005@cluster0.yrzhttm.mongodb.net/paytm"); 
+const userSchema = mongoose.Schema({
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true,
+        minLength: 3,
+        maxLength: 30
+    },
+    firstName: {
+        type: String,
+        required: true,
+        trim: true,
+        maxLength: 50
+    },
+    lastName: {
+        type: String,
+        required: true,
+        trim: true,
+        maxLength: 50
+    },
+    password_hash: {
+        type: String,
+        required: true,
+    },
+});
+userSchema.methods.createHash = async function (plainTextPassword) {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    return await bcrypt.hash(plainTextPassword, salt);
 };
 
-connectDB();
+userSchema.methods.validatePassword = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password_hash);
+};
 
-const userSchema = new mongoose.Schema({
-  username: String,
-  password: String,
-  firstName: String,
-  LastName:String
+const accountSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId, // Reference to User model
+        ref: 'User',
+        required: true
+    },
+    balance: {
+        type: Number,
+        required: true
+    }
 });
 
-module.exports = mongoose.model("User", userSchema);
+const Account = mongoose.model('Account', accountSchema);
+const User = mongoose.model('User', userSchema);
+
+module.exports = {
+    User,
+    Account
+}
