@@ -7,4 +7,4 @@ const router = express.Router();
 router.use('/user', userRoutes)
 router.use('/account', accountRoutes)
 
-module.exports = router;
+module.exports = router;     
