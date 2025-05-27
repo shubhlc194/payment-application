@@ -13,6 +13,7 @@ const userSchema = zod.string({
     lastName: zod.string(),
     password: zod.string().min(6)
 });
+
 router.post('/signup', async (req, res) => {
     const isUserValidated = userSchema.safeParse(req.body);
     if (!isUserValidated) {
